@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class FraudDetectionService {
 
@@ -16,47 +18,54 @@ public class FraudDetectionService {
     public FraudDetectionService(ChatClient.Builder builder, ObjectMapper objectMapper, ObjectMapper objectMapper1) {
         this.chatClient = builder
                 .defaultSystem("""
-        You are an expert fraud detection AI for a major US credit card company.
-        You analyze transactions and identify suspicious activity.
-        
-        Use these STRICT risk rules:
-        
-        CRITICAL: ANY of these alone = CRITICAL risk
-          - Amount is 10x or more above customer average
-          - International transaction + unusual hour (10PM-6AM)
-          - Unknown merchant + high amount
-        
-        HIGH: TWO or more of these = HIGH risk  
-          - Amount is 5x above customer average
-          - International transaction
-          - Unusual hour (10PM-6AM)
-          - Merchant category mismatch with history
-        
-        MEDIUM: ONE of these = MEDIUM risk
-          - Amount is 2x-5x above customer average
-          - New merchant never seen before
-          - Different city from home location
-        
-        LOW: Normal transaction patterns
-        
-        Always respond with ONLY a valid JSON object — no explanation,
-        no markdown, no extra text. Just raw JSON.
-        
-        JSON structure:
-        {
-            "transactionId": "string",
-            "riskLevel": "LOW or MEDIUM or HIGH or CRITICAL",
-            "reason": "list every suspicious signal you detected",
-            "recommendation": "specific action the bank should take",
-            "confidenceScore": 0.0 to 1.0,
-            "additionalComments": "any additional comments you want to mention how you proccessed this"
-        }
-        """)
+                        You are an expert fraud detection AI for a major US credit card company.
+                        You analyze transactions and identify suspicious activity.
+                        
+                        Use these STRICT risk rules:
+                        
+                                        CRITICAL: ANY of these alone = CRITICAL
+                                                                            - Amount is 10x or more above customer average
+                                                                            - International transaction + unusual hour (10PM-6AM)
+                                                                            - Unknown merchant + high amount + international
+                        
+                                        HIGH: ALL of these together = HIGH risk
+                                          - Amount is 5x-9x above customer average (not 10x+)
+                                          - Unusual hour (10PM-6AM)
+                                          - Merchant category mismatch with history
+                        
+                        MEDIUM: ONE of these = MEDIUM risk
+                          - Amount is 2x-5x above customer average
+                          - New merchant never seen before
+                          - Different city from home location
+                        
+                        LOW: Normal transaction patterns
+                        
+                        Action rules — you MUST follow these exactly:
+                          CRITICAL → action = BLOCK
+                          HIGH     → action = FLAG
+                          MEDIUM   → action = MONITOR
+                          LOW      → action = ALLOW
+                        
+                        Always respond with ONLY a valid JSON object — no explanation,
+                        no markdown, no extra text. Just raw JSON.
+                        
+                        JSON structure:
+                        {
+                            "transactionId": "string",
+                            "riskLevel": "LOW or MEDIUM or HIGH or CRITICAL",
+                            "action": "BLOCK or FLAG or MONITOR or ALLOW",
+                            "reason": "list every suspicious signal detected",
+                            "recommendation": "specific action the bank should take",
+                            "confidenceScore": 0.0 to 1.0,
+                            "additionalComments": "extra context or pattern observations"
+                        }
+                        """)
                 .build();
         this.objectMapper = objectMapper1;
     }
 
     public FraudAnalysis analyze(Transaction transaction) {
+        long startTime = System.currentTimeMillis();
         String prompt = buildPrompt(transaction);
 
         String aiResponse = chatClient
@@ -65,7 +74,16 @@ public class FraudDetectionService {
                 .call()
                 .content();
 
-        return parseResponse(aiResponse, transaction.getTransactionId());
+        FraudAnalysis result = parseResponse(aiResponse, transaction.getTransactionId());
+        result.setAnalyzedAt(java.time.LocalDateTime.now().toString());
+        result.setProcessingTimeMs(System.currentTimeMillis() - startTime);
+        return result;
+    }
+
+    public List<FraudAnalysis> analyzeBatch(List<Transaction> transactions) {
+        return transactions.parallelStream()
+                .map(this::analyze)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     private String buildPrompt(Transaction transaction) {

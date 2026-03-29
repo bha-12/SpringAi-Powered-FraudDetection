@@ -9,6 +9,8 @@ import com.springai.fraud.detection.service.FraudDetectionService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/fraud")
 public class FraudDetectionController {
@@ -22,5 +24,10 @@ public class FraudDetectionController {
     @PostMapping("/analyze")
     public FraudAnalysis analyze(@RequestBody Transaction transaction) {
         return fraudDetectionService.analyze(transaction);
+    }
+
+    @PostMapping("/analyze/batch")
+    public List<FraudAnalysis> analyzeBatch(@RequestBody List<Transaction> transactions) {
+        return fraudDetectionService.analyzeBatch(transactions);
     }
 }

@@ -8,11 +8,17 @@ import lombok.Data;
 public class FraudAnalysis {
     private String transactionId;
     private String riskLevel;
+    private String action;        // BLOCK, FLAG, MONITOR, ALLOW
 
     @JsonDeserialize(using = FlexibleStringDeserializer.class)
     private String reason;
 
     private String recommendation;
     private double confidenceScore;
+
+    @JsonDeserialize(using = FlexibleStringDeserializer.class)
     private String additionalComments;
+
+    private String analyzedAt;
+    private long processingTimeMs;
 }
