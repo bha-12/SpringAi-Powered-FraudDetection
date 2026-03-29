@@ -8,7 +8,8 @@ import lombok.Data;
 public class FraudAnalysis {
     private String transactionId;
     private String riskLevel;
-    private String action;        // BLOCK, FLAG, MONITOR, ALLOW
+    private String action;
+    private String detectionMethod;  // RULE_ENGINE or AI_ANALYSIS
 
     @JsonDeserialize(using = FlexibleStringDeserializer.class)
     private String reason;

@@ -14,13 +14,16 @@ public class FraudDetectionService {
 
     private final ChatClient chatClient;
     private final ObjectMapper objectMapper;
+    private final FraudRuleEngine ruleEngine;
 
     public FraudDetectionService(
             ChatClient.Builder builder,
             ObjectMapper objectMapper,
+            FraudRuleEngine ruleEngine,
             @Value("${fraud.detection.system.prompt}") String systemPrompt) {
 
         this.objectMapper = objectMapper;
+        this.ruleEngine = ruleEngine;
         this.chatClient = builder
                 .defaultSystem(systemPrompt)
                 .build();
@@ -28,15 +31,29 @@ public class FraudDetectionService {
 
     public FraudAnalysis analyze(Transaction transaction) {
         long startTime = System.currentTimeMillis();
-        String prompt = buildPrompt(transaction);
 
+        // Layer 1 — Rule Engine
+        FraudRuleEngine.RuleResult ruleResult = ruleEngine.evaluate(transaction);
+
+        if (ruleResult.getDecision() == FraudRuleEngine.RuleResult.Decision.BLOCK) {
+            return buildRuleBasedResult(transaction, "CRITICAL", "BLOCK",
+                    ruleResult.getReason(), startTime, "RULE_ENGINE");
+        }
+
+        if (ruleResult.getDecision() == FraudRuleEngine.RuleResult.Decision.ALLOW) {
+            return buildRuleBasedResult(transaction, "LOW", "ALLOW",
+                    ruleResult.getReason(), startTime, "RULE_ENGINE");
+        }
+
+        // Layer 2 — AI Analysis
         String aiResponse = chatClient
                 .prompt()
-                .user(prompt)
+                .user(buildPrompt(transaction))
                 .call()
                 .content();
 
         FraudAnalysis result = parseResponse(aiResponse, transaction.getTransactionId());
+        result.setDetectionMethod("AI_ANALYSIS");
         result.setAnalyzedAt(java.time.LocalDateTime.now().toString());
         result.setProcessingTimeMs(System.currentTimeMillis() - startTime);
         return result;
@@ -46,6 +63,28 @@ public class FraudDetectionService {
         return transactions.parallelStream()
                 .map(this::analyze)
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    private FraudAnalysis buildRuleBasedResult(Transaction transaction,
+                                               String riskLevel, String action, String reason,
+                                               long startTime, String method) {
+
+        FraudAnalysis result = new FraudAnalysis();
+        result.setTransactionId(transaction.getTransactionId());
+        result.setRiskLevel(riskLevel);
+        result.setAction(action);
+        result.setDetectionMethod(method);
+        result.setReason(reason);
+        result.setRecommendation(
+                action.equals("BLOCK")
+                        ? "Block card immediately and alert customer"
+                        : "Transaction approved — no action needed"
+        );
+        result.setConfidenceScore(1.0);
+        result.setAdditionalComments("Decision made by rule engine — no AI call needed");
+        result.setAnalyzedAt(java.time.LocalDateTime.now().toString());
+        result.setProcessingTimeMs(System.currentTimeMillis() - startTime);
+        return result;
     }
 
     private String buildPrompt(Transaction transaction) {
@@ -83,9 +122,7 @@ public class FraudDetectionService {
                     .replaceAll("```json", "")
                     .replaceAll("```", "")
                     .trim();
-
             return objectMapper.readValue(cleaned, FraudAnalysis.class);
-
         } catch (Exception e) {
             FraudAnalysis fallback = new FraudAnalysis();
             fallback.setTransactionId(transactionId);
