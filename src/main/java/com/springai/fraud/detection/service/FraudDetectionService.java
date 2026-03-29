@@ -4,6 +4,7 @@ import com.springai.fraud.detection.model.FraudAnalysis;
 import com.springai.fraud.detection.model.Transaction;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,56 +13,17 @@ import java.util.List;
 public class FraudDetectionService {
 
     private final ChatClient chatClient;
-
     private final ObjectMapper objectMapper;
 
-    public FraudDetectionService(ChatClient.Builder builder, ObjectMapper objectMapper, ObjectMapper objectMapper1) {
+    public FraudDetectionService(
+            ChatClient.Builder builder,
+            ObjectMapper objectMapper,
+            @Value("${fraud.detection.system.prompt}") String systemPrompt) {
+
+        this.objectMapper = objectMapper;
         this.chatClient = builder
-                .defaultSystem("""
-                        You are an expert fraud detection AI for a major US credit card company.
-                        You analyze transactions and identify suspicious activity.
-                        
-                        Use these STRICT risk rules:
-                        
-                                        CRITICAL: ANY of these alone = CRITICAL
-                                                                            - Amount is 10x or more above customer average
-                                                                            - International transaction + unusual hour (10PM-6AM)
-                                                                            - Unknown merchant + high amount + international
-                        
-                                        HIGH: ALL of these together = HIGH risk
-                                          - Amount is 5x-9x above customer average (not 10x+)
-                                          - Unusual hour (10PM-6AM)
-                                          - Merchant category mismatch with history
-                        
-                        MEDIUM: ONE of these = MEDIUM risk
-                          - Amount is 2x-5x above customer average
-                          - New merchant never seen before
-                          - Different city from home location
-                        
-                        LOW: Normal transaction patterns
-                        
-                        Action rules — you MUST follow these exactly:
-                          CRITICAL → action = BLOCK
-                          HIGH     → action = FLAG
-                          MEDIUM   → action = MONITOR
-                          LOW      → action = ALLOW
-                        
-                        Always respond with ONLY a valid JSON object — no explanation,
-                        no markdown, no extra text. Just raw JSON.
-                        
-                        JSON structure:
-                        {
-                            "transactionId": "string",
-                            "riskLevel": "LOW or MEDIUM or HIGH or CRITICAL",
-                            "action": "BLOCK or FLAG or MONITOR or ALLOW",
-                            "reason": "list every suspicious signal detected",
-                            "recommendation": "specific action the bank should take",
-                            "confidenceScore": 0.0 to 1.0,
-                            "additionalComments": "extra context or pattern observations"
-                        }
-                        """)
+                .defaultSystem(systemPrompt)
                 .build();
-        this.objectMapper = objectMapper1;
     }
 
     public FraudAnalysis analyze(Transaction transaction) {
@@ -117,7 +79,6 @@ public class FraudDetectionService {
 
     private FraudAnalysis parseResponse(String aiResponse, String transactionId) {
         try {
-            // Clean response in case AI adds markdown
             String cleaned = aiResponse
                     .replaceAll("```json", "")
                     .replaceAll("```", "")
@@ -126,7 +87,6 @@ public class FraudDetectionService {
             return objectMapper.readValue(cleaned, FraudAnalysis.class);
 
         } catch (Exception e) {
-            // Fallback if parsing fails
             FraudAnalysis fallback = new FraudAnalysis();
             fallback.setTransactionId(transactionId);
             fallback.setRiskLevel("UNKNOWN");
