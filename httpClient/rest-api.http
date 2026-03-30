@@ -1,0 +1,19 @@
+POST http://localhost:8080/fraud/analyze
+Content-Type: application/json
+
+{
+  "transactionId": "TXN-001",
+  "customerId": "CUST-123",
+  "amount": 4500.00,
+  "merchantName": "Unknown Electronics",
+  "merchantCategory": "Electronics",
+  "transactionLocation": "Lagos, Nigeria",
+  "customerHomeLocation": "Dallas, Texas",
+  "customerAverageSpend": 150.00,
+  "isInternational": true,
+  "timestamp": "2026-03-28T03:45:00"
+}
+
+<> 2026-03-28T223847.200.json
+<> 2026-03-28T223807.200.json
+<> 2026-03-28T222627.200.json

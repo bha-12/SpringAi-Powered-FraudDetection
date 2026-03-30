@@ -1,0 +1,202 @@
+### CRITICAL - Should BLOCK
+POST http://localhost:8080/fraud/analyze
+Content-Type: application/json
+
+{
+  "transactionId": "TXN-CRITICAL",
+  "customerId": "CUST-001",
+  "amount": 4500.00,
+  "merchantName": "Unknown Electronics",
+  "merchantCategory": "Electronics",
+  "transactionLocation": "Lagos, Nigeria",
+  "customerHomeLocation": "Dallas, Texas",
+  "customerAverageSpend": 150.00,
+  "isInternational": true,
+  "timestamp": "2026-03-29T03:45:00"
+}
+
+<> 2026-03-29T151114.200.json
+<> 2026-03-29T142356.200.json
+<> 2026-03-29T142317.200.json
+<> 2026-03-29T142133.200.json
+<> 2026-03-29T141413.200.json
+
+### HIGH - Should FLAG
+POST http://localhost:8080/fraud/analyze
+Content-Type: application/json
+
+{
+  "transactionId": "TXN-HIGH",
+  "customerId": "CUST-002",
+  "amount": 1200.00,
+  "merchantName": "Casino Royal",
+  "merchantCategory": "Gambling",
+  "transactionLocation": "Las Vegas, Nevada",
+  "customerHomeLocation": "Dallas, Texas",
+  "customerAverageSpend": 200.00,
+  "isInternational": false,
+  "timestamp": "2026-03-29T23:30:00"
+}
+
+<> 2026-03-29T142358.200.json
+<> 2026-03-29T142332.200.json
+<> 2026-03-29T141415.200.json
+
+### MEDIUM - Should MONITOR
+POST http://localhost:8080/fraud/analyze
+Content-Type: application/json
+
+{
+  "transactionId": "TXN-MEDIUM",
+  "customerId": "CUST-003",
+  "amount": 450.00,
+  "merchantName": "Best Buy",
+  "merchantCategory": "Electronics",
+  "transactionLocation": "Austin, Texas",
+  "customerHomeLocation": "Dallas, Texas",
+  "customerAverageSpend": 150.00,
+  "isInternational": false,
+  "timestamp": "2026-03-29T14:30:00"
+}
+
+<> 2026-03-29T142401.200.json
+<> 2026-03-29T141417.200.json
+
+### LOW - Should ALLOW
+POST http://localhost:8080/fraud/analyze
+Content-Type: application/json
+
+{
+  "transactionId": "TXN-LOW",
+  "customerId": "CUST-004",
+  "amount": 45.00,
+  "merchantName": "Walmart",
+  "merchantCategory": "Grocery",
+  "transactionLocation": "Dallas, Texas",
+  "customerHomeLocation": "Dallas, Texas",
+  "customerAverageSpend": 100.00,
+  "isInternational": false,
+  "timestamp": "2026-03-29T11:00:00"
+}
+
+
+### BATCH - All 4 risk levels at once
+POST http://localhost:8080/fraud/analyze/batch
+Content-Type: application/json
+
+[
+  {
+    "transactionId": "TXN-CRITICAL",
+    "customerId": "CUST-001",
+    "amount": 4500.00,
+    "merchantName": "Unknown Electronics",
+    "merchantCategory": "Electronics",
+    "transactionLocation": "Lagos, Nigeria",
+    "customerHomeLocation": "Dallas, Texas",
+    "customerAverageSpend": 150.00,
+    "isInternational": true,
+    "timestamp": "2026-03-29T03:45:00"
+  },
+  {
+    "transactionId": "TXN-HIGH",
+    "customerId": "CUST-002",
+    "amount": 1200.00,
+    "merchantName": "Casino Royal",
+    "merchantCategory": "Gambling",
+    "transactionLocation": "Las Vegas, Nevada",
+    "customerHomeLocation": "Dallas, Texas",
+    "customerAverageSpend": 200.00,
+    "isInternational": false,
+    "timestamp": "2026-03-29T23:30:00"
+  },
+  {
+    "transactionId": "TXN-MEDIUM",
+    "customerId": "CUST-003",
+    "amount": 450.00,
+    "merchantName": "Best Buy",
+    "merchantCategory": "Electronics",
+    "transactionLocation": "Austin, Texas",
+    "customerHomeLocation": "Dallas, Texas",
+    "customerAverageSpend": 150.00,
+    "isInternational": false,
+    "timestamp": "2026-03-29T14:30:00"
+  },
+  {
+    "transactionId": "TXN-LOW",
+    "customerId": "CUST-004",
+    "amount": 45.00,
+    "merchantName": "Walmart",
+    "merchantCategory": "Grocery",
+    "transactionLocation": "Dallas, Texas",
+    "customerHomeLocation": "Dallas, Texas",
+    "customerAverageSpend": 100.00,
+    "isInternational": false,
+    "timestamp": "2026-03-29T11:00:00"
+  }
+]
+
+
+### Rule Engine — BLOCK
+POST http://localhost:8080/fraud/analyze
+Content-Type: application/json
+
+{
+  "transactionId": "TXN-RULE-BLOCK",
+  "customerId": "CUST-001",
+  "amount": 9999.00,
+  "merchantName": "Unknown Electronics",
+  "merchantCategory": "Electronics",
+  "transactionLocation": "Lagos, Nigeria",
+  "customerHomeLocation": "Dallas, Texas",
+  "customerAverageSpend": 150.00,
+  "isInternational": true,
+  "timestamp": "2026-03-29T03:45:00"
+}
+
+<> 2026-03-29T171142.200.json
+
+### Rule Engine — ALLOW
+POST http://localhost:8080/fraud/analyze
+Content-Type: application/json
+
+{
+  "transactionId": "TXN-RULE-ALLOW",
+  "customerId": "CUST-002",
+  "amount": 45.00,
+  "merchantName": "Walmart",
+  "merchantCategory": "Grocery",
+  "transactionLocation": "Dallas, Texas",
+  "customerHomeLocation": "Dallas, Texas",
+  "customerAverageSpend": 100.00,
+  "isInternational": false,
+  "timestamp": "2026-03-29T11:00:00"
+}
+
+<> 2026-03-29T171231.200.json
+<> 2026-03-29T171114.200.json
+<> 2026-03-29T171101.200.json
+
+### AI Analysis — uncertain transaction
+POST http://localhost:8080/fraud/analyze
+Content-Type: application/json
+
+{
+  "transactionId": "TXN-AI-ANALYSIS",
+  "customerId": "CUST-003",
+  "amount": 850.00,
+  "merchantName": "Best Buy",
+  "merchantCategory": "Electronics",
+  "transactionLocation": "Austin, Texas",
+  "customerHomeLocation": "Dallas, Texas",
+  "customerAverageSpend": 300.00,
+  "isInternational": false,
+  "timestamp": "2026-03-29T14:30:00"
+}
+
+<> 2026-03-29T171245.200.json
+<> 2026-03-29T171020.200.json
+<> 2026-03-29T171011.200.json
+<> 2026-03-29T151005.200.json
+<> 2026-03-29T142932.200.json
+<> 2026-03-29T142403.200.json
+<> 2026-03-29T141419.200.json
