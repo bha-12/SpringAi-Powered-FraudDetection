@@ -52,7 +52,6 @@ public class FraudRuleEngine {
         }
     }
 
-    // ── Inner result class ──────────────────────────────────
     public static class RuleResult {
         public enum Decision { BLOCK, ALLOW, SEND_TO_AI }
 

@@ -193,6 +193,83 @@ Content-Type: application/json
   "timestamp": "2026-03-29T14:30:00"
 }
 
+
+
+### AI Agent Investigation
+POST http://localhost:8080/agent/investigate
+Content-Type: text/plain
+
+Investigate this suspicious transaction and take appropriate action:
+Transaction TXN-AGENT-001 for customer CUST-001.
+Amount $4500 at Unknown Electronics in Lagos Nigeria.
+Customer average spend is $150. International transaction at 3AM.
+Take all necessary actions to protect the customer.
+
+
+### AI Agent — Low Risk Test
+POST http://localhost:8080/agent/investigate
+Content-Type: text/plain
+
+Investigate this transaction for customer CUST-002.
+Transaction TXN-AGENT-002 amount $45 at Walmart Dallas Texas.
+Customer average spend is $3200. Local transaction at 2PM.
+Take all necessary actions.
+
+
+
+### AI Agent — HIGH Risk Test
+POST http://localhost:8080/agent/investigate
+Content-Type: text/plain
+
+Investigate transaction TXN-AGENT-003 for customer CUST-003.
+Amount $2000 at Casino Royal Las Vegas Nevada.
+Customer average spend is $800. Late night transaction at 11PM.
+Take all necessary actions.
+
+
+
+
+### Step 1 - Agent Investigation
+POST http://localhost:8080/agent/investigate
+Content-Type: text/plain
+
+Investigate this suspicious transaction and take appropriate action:
+Transaction TXN-AGENT-001 for customer CUST-001.
+Amount $4500 at Unknown Electronics in Lagos Nigeria.
+Customer average spend is $150. International transaction at 3AM.
+
+
+### Step 2 - View pending cases for human review
+GET http://localhost:8080/agent/queue
+
+### Step 3 - Human approves the AI recommendation
+POST http://localhost:8080/agent/queue/CASE-A125C166/approve?reviewedBy=Bharat
+
+### Human Analyst rejects MEDIUM risk case
+POST http://localhost:8080/agent/queue/CASE-ED0C1B13/reject?reviewedBy=Bharat
+
+### Step 4 - Verify queue status
+GET http://localhost:8080/agent/queue/count
+
+
+### Step 1 - Agent Investigation with Llama 3.1
+POST http://localhost:8080/agent/investigate
+Content-Type: text/plain
+
+Use your tools to investigate this transaction:
+Customer: CUST-001
+Transaction: TXN-AGENT-001
+Amount: $4500
+Merchant: Unknown Electronics
+Location: Lagos Nigeria
+Average spend: $150
+International: yes
+Time: 3AM
+
+Call getCustomerDetails, then analyzeTransaction,
+then addToReviewQueue with your findings.
+
+
 <> 2026-03-29T171245.200.json
 <> 2026-03-29T171020.200.json
 <> 2026-03-29T171011.200.json

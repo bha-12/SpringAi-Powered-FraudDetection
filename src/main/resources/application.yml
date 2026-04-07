@@ -4,7 +4,7 @@ spring:
       base-url: http://localhost:11434
       chat:
         options:
-          model: mistral
+          model: llama3.1:8b
   application:
     name: ai-engineer
 
