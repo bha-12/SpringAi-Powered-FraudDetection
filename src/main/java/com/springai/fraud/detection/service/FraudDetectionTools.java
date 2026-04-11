@@ -72,7 +72,7 @@ public class FraudDetectionTools {
             String riskLevel,
             String recommendedAction,
             String reason,
-            double confidenceScore) {
+            Double confidenceScore) {
         System.out.println("🔧 Tool called: addToReviewQueue(" + transactionId + ")");
         Customer customer = customerService.getCustomerById(customerId);
         FraudReviewCase reviewCase = new FraudReviewCase();
@@ -84,7 +84,7 @@ public class FraudDetectionTools {
         reviewCase.setAiRecommendation(
                 "AI recommends: " + recommendedAction +
                         " with confidence " + confidenceScore);
-        reviewCase.setConfidenceScore(confidenceScore);
+        reviewCase.setConfidenceScore(confidenceScore != null ? confidenceScore : 0.0);
         reviewCase.setCustomer(customer);
         return reviewQueueService.addToQueue(reviewCase);
     }

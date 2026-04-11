@@ -270,6 +270,35 @@ Call getCustomerDetails, then analyzeTransaction,
 then addToReviewQueue with your findings.
 
 
+
+
+### V2 Analysis with Resilience4j
+POST http://localhost:8080/v2/fraud/analyze
+Content-Type: application/json
+
+{
+  "transactionId": "TXN-V2-001",
+  "customerId": "CUST-001",
+  "amount": 4500.00,
+  "merchantName": "Unknown Electronics",
+  "merchantCategory": "Electronics",
+  "transactionLocation": "Lagos Nigeria",
+  "customerHomeLocation": "Dallas Texas",
+  "customerAverageSpend": 150.00,
+  "isInternational": true,
+  "timestamp": "2024-01-15T03:00:00"
+}
+
+### System health
+GET http://localhost:8080/actuator/health
+
+
+### Check metrics
+GET http://localhost:8080/v2/fraud/metrics/summary
+
+### Circuit breaker state
+GET http://localhost:8080/actuator/metrics/resilience4j.circuitbreaker.state
+
 <> 2026-03-29T171245.200.json
 <> 2026-03-29T171020.200.json
 <> 2026-03-29T171011.200.json
