@@ -299,6 +299,22 @@ GET http://localhost:8080/v2/fraud/metrics/summary
 ### Circuit breaker state
 GET http://localhost:8080/actuator/metrics/resilience4j.circuitbreaker.state
 
+
+
+### Fresh investigation
+POST http://localhost:8080/agent/investigate
+Content-Type: text/plain
+
+Use your tools to investigate this transaction:
+Customer: CUST-001
+Transaction: TXN-MONGO-001
+Amount: $4500
+Merchant: Unknown Electronics
+Location: Lagos Nigeria
+Average spend: $1500
+International: yes
+Time: 3AM
+
 <> 2026-03-29T171245.200.json
 <> 2026-03-29T171020.200.json
 <> 2026-03-29T171011.200.json

@@ -65,7 +65,7 @@ public class FraudDetectionTools {
     }
 
     @Tool(name = "addToReviewQueue",
-            description = "Add fraud case to human review queue. Use instead of blocking directly.")
+            description = "Add fraud case to human review queue with transaction ID, customer ID, risk level, recommended action, reason and confidence score between 0 and 1")
     public FraudReviewCase addToReviewQueue(
             String transactionId,
             String customerId,
@@ -73,8 +73,12 @@ public class FraudDetectionTools {
             String recommendedAction,
             String reason,
             Double confidenceScore) {
-        System.out.println("🔧 Tool called: addToReviewQueue(" + transactionId + ")");
+
+        System.out.println("🔧 Tool called: addToReviewQueue("
+                + transactionId + ")");
+
         Customer customer = customerService.getCustomerById(customerId);
+
         FraudReviewCase reviewCase = new FraudReviewCase();
         reviewCase.setTransactionId(transactionId);
         reviewCase.setCustomerId(customerId);
@@ -84,8 +88,10 @@ public class FraudDetectionTools {
         reviewCase.setAiRecommendation(
                 "AI recommends: " + recommendedAction +
                         " with confidence " + confidenceScore);
-        reviewCase.setConfidenceScore(confidenceScore != null ? confidenceScore : 0.0);
+        reviewCase.setConfidenceScore(
+                confidenceScore != null ? confidenceScore : 0.0);
         reviewCase.setCustomer(customer);
+
         return reviewQueueService.addToQueue(reviewCase);
     }
 
