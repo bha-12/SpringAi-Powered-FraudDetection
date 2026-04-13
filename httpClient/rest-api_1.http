@@ -306,14 +306,14 @@ POST http://localhost:8080/agent/investigate
 Content-Type: text/plain
 
 Use your tools to investigate this transaction:
-Customer: CUST-001
-Transaction: TXN-MONGO-001
-Amount: $4500
+Customer: CUST-002
+Transaction: TXN-MONGO-002
+Amount: $2500
 Merchant: Unknown Electronics
 Location: Lagos Nigeria
 Average spend: $1500
 International: yes
-Time: 3AM
+Time: 4AM
 
 <> 2026-03-29T171245.200.json
 <> 2026-03-29T171020.200.json
@@ -322,3 +322,24 @@ Time: 3AM
 <> 2026-03-29T142932.200.json
 <> 2026-03-29T142403.200.json
 <> 2026-03-29T141419.200.json
+
+###
+POST http://localhost:8080/agent/investigate
+Content-Type: text/plain
+
+You MUST call these tools in this exact order:
+
+STEP 1: Call getCustomerDetails with customerId="CUST-001"
+STEP 2: Call analyzeTransaction with these exact values:
+        transactionId="TXN-AGENT-001"
+        customerId="CUST-001"
+        amount=4500
+        merchantName="Unknown Electronics"
+        merchantCategory="Electronics"
+        transactionLocation="Lagos Nigeria"
+        customerHomeLocation="Dallas Texas"
+        customerAverageSpend=150
+        isInternational=true
+        timestamp="3AM"
+STEP 3: Call addToReviewQueue with findings from STEP 2
+STEP 4: Report what you did

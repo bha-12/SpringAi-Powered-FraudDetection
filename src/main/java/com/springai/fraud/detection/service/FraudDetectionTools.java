@@ -79,6 +79,11 @@ public class FraudDetectionTools {
 
         Customer customer = customerService.getCustomerById(customerId);
 
+        Transaction transaction = new Transaction();
+        transaction.setTransactionId(transactionId);
+        transaction.setCustomerId(customerId);
+
+
         FraudReviewCase reviewCase = new FraudReviewCase();
         reviewCase.setTransactionId(transactionId);
         reviewCase.setCustomerId(customerId);
@@ -91,6 +96,7 @@ public class FraudDetectionTools {
         reviewCase.setConfidenceScore(
                 confidenceScore != null ? confidenceScore : 0.0);
         reviewCase.setCustomer(customer);
+        reviewCase.setTransaction(transaction);
 
         return reviewQueueService.addToQueue(reviewCase);
     }
