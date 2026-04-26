@@ -306,14 +306,14 @@ POST http://localhost:8080/agent/investigate
 Content-Type: text/plain
 
 Use your tools to investigate this transaction:
-Customer: CUST-002
-Transaction: TXN-MONGO-002
-Amount: $2500
+Customer: CUST-003
+Transaction: TXN-MONGO-003
+Amount: $8500
 Merchant: Unknown Electronics
-Location: Lagos Nigeria
-Average spend: $1500
+Location: Dubai
+Average spend: $2500
 International: yes
-Time: 4AM
+Time: 2AM
 
 <> 2026-03-29T171245.200.json
 <> 2026-03-29T171020.200.json
